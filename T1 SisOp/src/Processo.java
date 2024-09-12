@@ -41,5 +41,21 @@ public class Processo {
         creditos = (creditos / 2) + prioridade - 1;
     }
 
+    public int getCreditos() {
+        return creditos;
+    }
+
+    public void setCreditos(int creditos){
+        this.creditos = creditos;
+    }
+
+    public int getOrdem(){
+        return ordem;
+    }
+
+    public int getTempoCPU(){
+        return tempoCPU;
+    }
+
     // Outros métodos conforme necessário
 }

@@ -13,9 +13,6 @@ Classe Main
 
 Contém o método main para executar o programa e testar o escalonador.*/
 //Código Esqueleto
-import java.util.PriorityQueue;
-import java.util.Comparator;
-
 
 //3. Classe Main
 public class App {
