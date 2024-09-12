@@ -1,4 +1,6 @@
-/*Claro! Vamos criar um esqueleto básico para um projeto Java baseado na descrição do algoritmo de escalonamento de processos com prioridades. A ideia é estruturar o código em classes e métodos para refletir o comportamento descrito.
+/*Claro! Vamos criar um esqueleto básico para um projeto Java baseado na descrição do algoritmo 
+de escalonamento de processos com prioridades. 
+A ideia é estruturar o código em classes e métodos para refletir o comportamento descrito.
 
 Estrutura do Projeto Java
 Classe Processo
@@ -11,7 +13,6 @@ Classe Main
 
 Contém o método main para executar o programa e testar o escalonador.*/
 //Código Esqueleto
-//2. Classe Escalonador
 import java.util.PriorityQueue;
 import java.util.Comparator;
 
