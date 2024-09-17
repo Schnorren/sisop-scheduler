@@ -69,19 +69,23 @@ public class Processo {
             tempoRestanteES--;
             if (tempoRestanteES == 0) {
                 this.estado = Estado.READY; // Quando o tempo de E/S termina, o processo volta para "Ready"
-                
             }
         }
     }
 
-    public void atualizarCreditos() {
-        creditos = creditos / 2 + prioridade; // Redistribuição dos créditos
+public void atualizarCreditos() {
+    creditos = creditos / 2 + prioridade; // Redistribuição do crédito
+    if (estado == Estado.BLOCKED) { // Reduz o tempo restante de bloqueio em 1 unidade
+        trataPassagemTempoBloqueio();
     }
+}
+
+    
 
     @Override
     public String toString(){
-        return "Processo " + nome + "- Surto CPU res:\t" + surtoRestante + " - Tempo Exec CPU res:\t" + tempoTotalCPU + 
-        "\t- Estado:\t" + getEstado() + "\t- Créditos:\t" + creditos + "\tordem: " + ordem;
+        return "Processo " + nome + " ||  Surto CPU res: " + surtoRestante + "    - Tempo Exec CPU res: " + tempoTotalCPU + 
+        "    - Estado: " + getEstado() + "     - Créditos: " + creditos + "         ordem: " + ordem;
     }
 
     // Getters e Setters necessários para acessar os atributos

@@ -2,7 +2,6 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 
-
 public class Escalonador {
     private PriorityQueue<Processo> filaProntos;
     private int tempoAtual;
@@ -26,52 +25,44 @@ public class Escalonador {
     public void escalonar() {
         final int TEMPO_EXECUCAO_MS = 1;
         Processo processoAtual = filaProntos.poll(); // Obtém o processo com mais créditos
-        //mostrarEstado(processoAtual);
-        while (!filaProntos.isEmpty()) {
 
+        while (!filaProntos.isEmpty()) {
             mostrarEstado(processoAtual);
 
             processoAtual.defineEstadoBloqueio(TEMPO_EXECUCAO_MS);
 
-            if(processoAtual.getCreditos() == 0 && processoAtual.getSurtoCPU() == 0 && processoAtual.getEstado() == Processo.Estado.READY){
+            if (processoAtual.getCreditos() == 0 && processoAtual.getSurtoCPU() == 0 && processoAtual.getEstado() == Processo.Estado.READY) {
                 filaProntos.add(processoAtual); // Se não tiver terminado, adiciona novamente à fila
             }
 
             if (processoAtual.getEstado() == Processo.Estado.BLOCKED) {
                 processosBloqueados.add(processoAtual); // Se estiver bloqueado, Adiciona na lista de processos bloqueados
             }
-            
-            if(!processosBloqueados.isEmpty()){
+
+            if (!processosBloqueados.isEmpty()) {
                 trataProcessosBloqueados();
             }
-            
-            if(processoAtual.getEstado() != Processo.Estado.RUNNING && !primeiraExec)
-                processoAtual = filaProntos.poll(); // Obtém o processo com mais créditos
-                // processoAtual.setOrdem(qtdProcessos+processoAtual.getOrdem());
 
-            if(primeiraExec) primeiraExec = false;
+            if (processoAtual.getEstado() != Processo.Estado.RUNNING && !primeiraExec)
+                processoAtual = filaProntos.poll(); // Obtém o processo com mais créditos
+
+            if (primeiraExec) primeiraExec = false;
 
             if (processoAtual.getCreditos() > 0 
-                && (processoAtual.getEstado() == Processo.Estado.READY 
-                || processoAtual.getEstado() == Processo.Estado.RUNNING )) {
+            && (processoAtual.getEstado() == Processo.Estado.READY || processoAtual.getEstado() == Processo.Estado.RUNNING )) {
 
                 processoAtual.executar(TEMPO_EXECUCAO_MS); // Executa o processo por 1ms
                 processoAtual.setCreditos(processoAtual.getCreditos() - 1); // Reduz os créditos
-                
+
             } else {
                 Processo aux;
                 reordenarFila();
-                // Se não há créditos, redistribui os créditos para todos os processos
-                processoAtual.setEstado(Processo.Estado.READY);
-                processoAtual.setOrdem(qtdProcessos+processoAtual.getOrdem());
-                // atualizarCreditos(processoAtual);
-                if(verificaSeTodosOsProcessosPrecisamDeCredito()){
+
+                if (verificaSeTodosOsProcessosPrecisamDeCredito()) {
                     processoAtual.atualizarCreditos();
                     atualizarCreditos();
                 }
-                else{
-                    // processoAtual.atualizarCreditos();
-                }
+
                 aux = processoAtual;
                 processoAtual = filaProntos.poll(); // Obtém o processo com mais créditos
                 processoAtual.setEstado(Processo.Estado.RUNNING);
@@ -84,48 +75,41 @@ public class Escalonador {
     }
 
     private void atualizarCreditos() {
-        
         for (Processo p : filaProntos) {
-            if(p.getCreditos() == 0){
+            if (p.getCreditos() == 0) {
                 p.atualizarCreditos(); // Atualiza os créditos de cada processo
             }
-            if(p.getSurtoCPU() == 0)
+            if (p.getSurtoCPU() == 0)
                 p.renovaSurto();
         }
-        if(!processosBloqueados.isEmpty()){
+        if (!processosBloqueados.isEmpty()) {
             for (Processo p : processosBloqueados) {
-                if(p.getCreditos() == 0)
+                if (p.getCreditos() == 0)
                     p.atualizarCreditos(); // Atualiza os créditos de cada processo
-                if(p.getSurtoCPU() == 0)
+                if (p.getSurtoCPU() == 0)
                     p.renovaSurto();
             }
         }
     }
 
-    public boolean verificaSeTodosOsProcessosPrecisamDeCredito(){
-        boolean retorno = true;
+    public boolean verificaSeTodosOsProcessosPrecisamDeCredito() {
         for (Processo p : filaProntos) {
-            if(p.getCreditos() != 0){
-                retorno = false;
+            if (p.getCreditos() != 0) {
+                return false;
             }
         }
-        if(!retorno){
-            for (Processo p : processosBloqueados) {
-                if(p.getCreditos() != 0){
-                    retorno = false;
-                }
+        for (Processo p : processosBloqueados) {
+            if (p.getCreditos() != 0) {
+                return false;
             }
         }
-        else return retorno;
-
-        return retorno;
-
+        return true;
     }
 
-    private void trataProcessosBloqueados(){
-        for(Processo p : processosBloqueados){
+    private void trataProcessosBloqueados() {
+        for (Processo p : processosBloqueados) {
             p.trataPassagemTempoBloqueio();
-            if(p.getEstado() == Processo.Estado.READY){
+            if (p.getEstado() == Processo.Estado.READY) {
                 processosBloqueados.remove(p);
                 filaProntos.add(p);
                 p.renovaSurto();
@@ -133,31 +117,51 @@ public class Escalonador {
         }
     }
 
-    // Método para exibir o estado atual do escalonador e dos processos
-    public void mostrarEstado(Processo processoAtual) {
-        System.out.println("Tempo Atual: " + tempoAtual);
-        //System.out.println("Processo " + processoAtual.getNome() + " - Estado: " + processoAtual.getEstado() + 
-        System.out.println(processoAtual);
-        for (Processo p : filaProntos) {
-            System.out.println(p);
-        }
-        if(!processosBloqueados.isEmpty()){
-            for (Processo p : processosBloqueados) {
-                System.out.println(p);
-            }
-        }
+// Método para exibir o estado atual do escalonador e dos processos
+public void mostrarEstado(Processo processoAtual) {
+    System.out.println("\033[34mTempo Atual: " + tempoAtual + "\033[0m");
+
+    // Criar uma lista combinada de todos os processos (prontos, bloqueados, e o atual)
+    LinkedList<Processo> listaCombinada = new LinkedList<>(filaProntos);
+    listaCombinada.addAll(processosBloqueados); // Adiciona os bloqueados na mesma lista
+    if (processoAtual != null && !listaCombinada.contains(processoAtual)) {
+        listaCombinada.add(processoAtual); // Adiciona o processo atual se não estiver na lista
     }
 
-    // Função para reordenar a fila de processos (filaProntos) após mudanças de créditos ou ordem
-private void reordenarFila() {
-    // Armazenar os processos temporariamente
-    LinkedList<Processo> listaTemporaria = new LinkedList<>(filaProntos);
-    
-    // Limpar a fila
-    filaProntos.clear();
-    
-    // Adicionar os processos de volta na fila para que ela se reorganize automaticamente
-    filaProntos.addAll(listaTemporaria);
+    // Ordena a lista combinada pela ordem dos processos
+    listaCombinada.sort(Comparator.comparingInt(Processo::getOrdem));
+
+    // Exibir os processos, todos juntos na mesma lista, com suas respectivas cores
+    for (Processo p : listaCombinada) {
+        System.out.println(getColoredProcessoString(p));
+    }
+
+    System.out.println("\n");
 }
 
+// Método auxiliar para colorir o estado do processo
+private String getColoredProcessoString(Processo processo) {
+    String color = "";
+    switch (processo.getEstado()) {
+        case RUNNING:
+            color = "\033[34m"; // Azul para execução
+            break;
+        case READY:
+            color = "\033[32m"; // Verde para pronto
+            break;
+        case BLOCKED:
+            color = "\033[33m"; // Amarelo para bloqueado
+            break;
+        case EXIT:
+            color = "\033[31m"; // Vermelho para exit
+            break;
+    }
+    return color + processo + "\033[0m"; // Reseta a cor após o nome do processo
+}
+
+    private void reordenarFila() {
+        LinkedList<Processo> listaTemporaria = new LinkedList<>(filaProntos);
+        filaProntos.clear();
+        filaProntos.addAll(listaTemporaria);
+    }
 }
